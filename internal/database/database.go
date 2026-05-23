@@ -14,15 +14,15 @@ import (
 
 func New() (*gorm.DB, error) {
 	// Get database URL from environment
-	databaseURL := fmt.Sprintf(
+	/*databaseURL := fmt.Sprintf(
 		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
 		os.Getenv("PGUSER"),
 		os.Getenv("PGPASSWORD"),
 		os.Getenv("DATABASE_URL"),
 		os.Getenv("PGPORT"),
 		os.Getenv("PGDATABASE"),
-	)
-	//databaseURL := os.Getenv("DATABASE_URL")
+	)*/
+	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		return nil, fmt.Errorf("DATABASE_URL environment variable not set")
 	}
