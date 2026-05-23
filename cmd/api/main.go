@@ -111,11 +111,3 @@ func getEnv(key, defaultValue string) string {
 //services.FetchWeatherForAllLocations()
 //app.cron.AddFunc("* 20 * * *", services.FetchRainfallForAllLocations)
 //services.FetchRainfallForAllLocations()
-
-//app.cron.Start()
-// Setup cron jobs
-//	app.setupCronJobs()
-
-// Start cron scheduler
-//	app.cron.Start()
-//	defer app.cron.Stop()

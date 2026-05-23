@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"goapi.railway.app/internal/database"
 	"goapi.railway.app/internal/models"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -40,16 +40,16 @@ type OpenMeteoWeatherResponse struct {
 }
 
 // FetchWeatherForAllLocations polls weather for all locations
-func FetchWeatherForAllLocations() {
+func FetchWeatherForAllLocations(db *gorm.DB) {
 	log.Println("Starting weather fetch for all locations...")
 
 	var locations []models.WeatherLocation
-	if err := database.DB.Find(&locations).Error; err != nil {
+	if err := db.Find(&locations).Error; err != nil {
 		log.Printf("Error fetching locations: %v", err)
 		return
 	}
 	for _, location := range locations {
-		if err := fetchAndStoreWeather(location); err != nil {
+		if err := fetchAndStoreWeather(db, location); err != nil {
 			log.Printf("Error fetching weather for location %d: %v", location.ID, err)
 			continue
 		}
@@ -59,7 +59,7 @@ func FetchWeatherForAllLocations() {
 	log.Println("Weather fetch completed")
 }
 
-func fetchAndStoreWeather(location models.WeatherLocation) error {
+func fetchAndStoreWeather(db *gorm.DB, location models.WeatherLocation) error {
 	// Call Open-Meteo API
 	url := fmt.Sprintf(
 		"https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&current_weather=true",
@@ -92,7 +92,7 @@ func fetchAndStoreWeather(location models.WeatherLocation) error {
 		CreatedAt:     time.Now(),
 	}
 
-	if err := database.DB.Create(&weather).Error; err != nil {
+	if err := db.Create(&weather).Error; err != nil {
 		return fmt.Errorf("failed to save weather: %w", err)
 	}
 
@@ -144,16 +144,16 @@ type DailyData struct {
 }
 
 // FetchRainfallForAllLocations polls weather for all locations
-func FetchRainfallForAllLocations() {
+func FetchRainfallForAllLocations(db *gorm.DB) {
 	log.Println("Starting rain fetch for all locations...")
 
 	var locations []models.WeatherLocation
-	if err := database.DB.Find(&locations).Error; err != nil {
+	if err := db.Find(&locations).Error; err != nil {
 		log.Printf("Error fetching locations: %v", err)
 		return
 	}
 	for _, location := range locations {
-		if err := fetchAndStoreRainfall(location); err != nil {
+		if err := fetchAndStoreRainfall(db, location); err != nil {
 			log.Printf("Error fetching rain for location %d: %v", location.ID, err)
 			continue
 		}
@@ -163,7 +163,7 @@ func FetchRainfallForAllLocations() {
 	log.Println("Rainfall fetch completed")
 }
 
-func fetchAndStoreRainfall(location models.WeatherLocation) error {
+func fetchAndStoreRainfall(db *gorm.DB, location models.WeatherLocation) error {
 
 	// Start date: 3 days ago
 	now := time.Now()
@@ -204,7 +204,7 @@ func fetchAndStoreRainfall(location models.WeatherLocation) error {
 			Precipitation: rainfall,
 			CreatedAt:     time.Now(),
 		}
-		if err := database.DB.Clauses(clause.OnConflict{
+		if err := db.Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "location_id"}, {Name: "time"}},
 			DoUpdates: clause.AssignmentColumns([]string{"precipitation"}),
 		}).Create(&r).Error; err != nil {
