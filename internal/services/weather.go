@@ -41,7 +41,7 @@ type OpenMeteoWeatherResponse struct {
 
 // FetchWeatherForAllLocations polls weather for all locations
 func FetchWeatherForAllLocations(db *gorm.DB) {
-	log.Println("Starting weather fetch for all locations...")
+	//log.Println("Starting weather fetch for all locations...")
 
 	var locations []models.WeatherLocation
 	if err := db.Find(&locations).Error; err != nil {
@@ -53,10 +53,9 @@ func FetchWeatherForAllLocations(db *gorm.DB) {
 			log.Printf("Error fetching weather for location %d: %v", location.ID, err)
 			continue
 		}
-		log.Printf("Successfully fetched weather for %s", location.Name)
+		//log.Printf("Successfully fetched weather for %s", location.Name)
 	}
-
-	log.Println("Weather fetch completed")
+	//log.Println("Weather fetch completed")
 }
 
 func fetchAndStoreWeather(db *gorm.DB, location models.WeatherLocation) error {

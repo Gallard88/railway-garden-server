@@ -11,7 +11,7 @@ func (app *application) setupCronJobs() {
 	// Example 1: Run every minute
 
 	app.cron.AddFunc("*/15 * * * *", func() {
-		log.Println("Running task: fetchWeatherForAllLocations() ")
+		//log.Println("Running task: fetchWeatherForAllLocations() ")
 		app.fetchWeatherForAllLocations(app.db)
 	})
 	app.fetchWeatherForAllLocations(app.db)
