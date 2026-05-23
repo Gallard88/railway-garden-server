@@ -11,15 +11,18 @@ func (app *application) setupCronJobs() {
 	// Example 1: Run every minute
 
 	app.cron.AddFunc("*/15 * * * *", func() {
-		log.Println("Running task: Feathcing ")
+		log.Println("Running task: fetchWeatherForAllLocations() ")
 		app.fetchWeatherForAllLocations(app.db)
 	})
 	app.fetchWeatherForAllLocations(app.db)
 
-	app.cron.AddFunc("0 20 * * *", func() {
-		log.Println("Running task: Feathcing ")
+	_, err := app.cron.AddFunc("CRON_TZ=Australia/Sydney 0 5 * * *", func() {
+		log.Println("Running task: fetchRainfallForAllLocations() ")
 		app.fetchRainfallForAllLocations(app.db)
 	})
+	if err != nil {
+		log.Printf("Error scheduling rainfall fetch job: %v", err)
+	}
 	app.fetchRainfallForAllLocations(app.db)
 
 }
