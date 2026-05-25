@@ -22,8 +22,9 @@ func NewWeatherRecordRepository(db *gorm.DB) WeatherRecordRepository {
 func (r *weatherRecordRepository) List(ctx context.Context, id uint) ([]models.WeatherRecord, error) {
 	var WeatherRecords []models.WeatherRecord
 	err := r.db.WithContext(ctx).
-		Where("id = ?", id).
+		Where("location_id = ?", id).
 		Order("id DESC").
+		Limit(48 * 4).
 		Find(&WeatherRecords).Error
 	return WeatherRecords, err
 }
