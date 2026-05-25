@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"goapi.railway.app/internal/services"
+	"goapi.railway.app/internal/service"
 	"gorm.io/gorm"
 )
 
@@ -28,11 +28,11 @@ func (app *application) setupCronJobs() {
 }
 
 func (app *application) fetchWeatherForAllLocations(db *gorm.DB) {
-	services.FetchWeatherForAllLocations(db)
+	service.FetchWeatherForAllLocations(db)
 }
 
 func (app *application) fetchRainfallForAllLocations(db *gorm.DB) {
-	services.FetchRainfallForAllLocations(db)
+	service.FetchRainfallForAllLocations(db)
 }
 
 // Example cron job implementations

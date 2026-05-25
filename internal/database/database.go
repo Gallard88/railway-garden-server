@@ -68,9 +68,9 @@ func runMigrations(db *gorm.DB) error {
 	// Auto-migrate your models
 	return db.AutoMigrate(
 		&models.Plant{},
-		&models.WeatherLocation{},
 		&models.Weather{},
 		&models.Rainfall{},
+		&models.WeatherLocation{},
 		// Add more models here as you create them
 	)
 }

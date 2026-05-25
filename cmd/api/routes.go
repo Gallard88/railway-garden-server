@@ -2,6 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"goapi.railway.app/internal/handler"
+	"goapi.railway.app/internal/repository"
+	"goapi.railway.app/internal/service"
 )
 
 func (app *application) routes() *gin.Engine {
@@ -25,6 +28,15 @@ func (app *application) routes() *gin.Engine {
 		c.Next()
 	})
 
+	// Initialize repositories
+	locationRepo := repository.NewWeatherLocationRepository(app.db)
+
+	// Initialize services
+	locationService := service.NewWeatherLocationService(locationRepo)
+
+	// Initialize handlers
+	locationHandler := handler.NewWeatherLocationHandler(locationService)
+
 	// Health check route
 	router.GET("/v1/healthcheck", app.healthcheckHandler)
 
@@ -38,6 +50,7 @@ func (app *application) routes() *gin.Engine {
 			tasks.GET("/:id", app.getTaskHandler)
 		}
 	}
+	locationHandler.RegisterRoutes(v1)
 
 	return router
 }
