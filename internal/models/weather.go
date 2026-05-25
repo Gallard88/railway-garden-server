@@ -12,7 +12,7 @@ type WeatherLocation struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type Weather struct {
+type WeatherRecord struct {
 	ID            uint      `gorm:"primaryKey" json:"id"`
 	LocationID    uint      `gorm:"not null;index" json:"location_id"`
 	Time          time.Time `json:"time"`

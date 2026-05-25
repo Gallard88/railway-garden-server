@@ -82,7 +82,7 @@ func fetchAndStoreWeather(db *gorm.DB, location models.WeatherLocation) error {
 	}
 
 	// Store in database
-	weather := models.Weather{
+	weather := models.WeatherRecord{
 		LocationID:    location.ID,
 		Time:          weatherData.CurrentWeather.Time.Time,
 		Temperature:   weatherData.CurrentWeather.Temperature,
