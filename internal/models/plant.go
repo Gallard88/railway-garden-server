@@ -14,13 +14,12 @@ type Plant struct {
 	NextWater   time.Time `json:"next_water"`
 }
 
-type CreatePlantRequest struct {
-	Name      string  `json:"name" binding:"required"`
-	Zone      uint    `json:"zone" binding:"required,zone"`
-	WaterFreq float64 `json:"water_freq" binding:"water_freq"`
-}
-
-type UpdatePlantRequest struct {
-	Name  string `json:"name"`
-	Email string `json:"email" binding:"omitempty,email"`
+type PlantZone struct {
+	ID            uint      `gorm:"primaryKey" json:"id"`
+	Name          string    `gorm:"not null" json:"name"`
+	LocationID    uint      `gorm:"check:location_id >= 0" json:"location_id"`
+	Outdoor       bool      `json:"outdoor"`
+	RainThreshold float64   `json:"rain_threshold"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }

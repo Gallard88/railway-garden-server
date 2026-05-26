@@ -156,10 +156,7 @@ func FetchRainfallForAllLocations(db *gorm.DB) {
 			log.Printf("Error fetching rain for location %d: %v", location.ID, err)
 			continue
 		}
-		log.Printf("Successfully rain weather for %s", location.Name)
 	}
-
-	log.Println("Rainfall fetch completed")
 }
 
 func fetchAndStoreRainfall(db *gorm.DB, location models.WeatherLocation) error {

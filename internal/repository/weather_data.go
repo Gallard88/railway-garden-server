@@ -47,7 +47,7 @@ func (r *weatherRainfallRepository) List(ctx context.Context, id uint) ([]models
 	err := r.db.WithContext(ctx).
 		Where("location_id = ?", id).
 		Order("id DESC").
-		Limit(48 * 4).
+		Limit(14).
 		Find(&Rainfalls).Error
 	return Rainfalls, err
 }

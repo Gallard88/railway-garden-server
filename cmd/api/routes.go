@@ -38,15 +38,13 @@ func (app *application) routes() *gin.Engine {
 
 	// API v1 routes
 	v1 := router.Group("/v1")
-	{
-		// Cron/Task routes (for monitoring scheduled jobs)
-		tasks := v1.Group("/tasks")
-		{
-			tasks.GET("", app.listTasksHandler)
-			tasks.GET("/:id", app.getTaskHandler)
-		}
-	}
 	locationHandler.RegisterRoutes(v1)
+
+	// Initialize plant zone repositories and services
+	zoneRepo := repository.NewPlantZoneRepository(app.db)
+	zoneService := service.NewPlantZoneService(zoneRepo)
+	zoneHandler := handler.NewPlantZoneHandler(zoneService)
+	zoneHandler.RegisterRoutes(v1)
 
 	weatherRecordRepo := repository.NewWeatherRecordRepository(app.db)
 	weatherRecordService := service.NewWeatherRecordService(weatherRecordRepo)

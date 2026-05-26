@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -14,14 +13,6 @@ import (
 
 func New() (*gorm.DB, error) {
 	// Get database URL from environment
-	/*databaseURL := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		os.Getenv("PGUSER"),
-		os.Getenv("PGPASSWORD"),
-		os.Getenv("DATABASE_URL"),
-		os.Getenv("PGPORT"),
-		os.Getenv("PGDATABASE"),
-	)*/
 	databaseURL := os.Getenv("DATABASE_URL")
 	if databaseURL == "" {
 		return nil, fmt.Errorf("DATABASE_URL environment variable not set")
@@ -59,8 +50,6 @@ func New() (*gorm.DB, error) {
 	if err := runMigrations(db); err != nil {
 		return nil, fmt.Errorf("failed to run migrations: %w", err)
 	}
-
-	log.Println("Successfully connected to database and ran migrations")
 	return db, nil
 }
 
@@ -68,9 +57,9 @@ func runMigrations(db *gorm.DB) error {
 	// Auto-migrate your models
 	return db.AutoMigrate(
 		&models.Plant{},
+		&models.PlantZone{},
+		&models.WeatherLocation{},
 		&models.WeatherRecord{},
 		&models.Rainfall{},
-		&models.WeatherLocation{},
-		// Add more models here as you create them
 	)
 }
