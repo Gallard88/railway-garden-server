@@ -15,9 +15,9 @@ type PlantZoneResponse struct {
 // CreatePlantZoneRequest - For creating new plant zones
 type CreatePlantZoneRequest struct {
 	Name          string  `json:"name" binding:"required,min=2"`
-	LocationID    uint    `json:"location_id" binding:"required"`
-	Outdoor       bool    `json:"outdoor" binding:"required"`
-	RainThreshold float64 `json:"rain_threshold" binding:"required"`
+	LocationID    uint    `json:"location_id"`
+	Outdoor       bool    `json:"outdoor"`
+	RainThreshold float64 `json:"rain_threshold"`
 }
 
 // ListPlantZonesResponse - List all plant zones
