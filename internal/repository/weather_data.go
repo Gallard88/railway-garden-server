@@ -31,7 +31,7 @@ func (r *weatherRecordRepository) List(ctx context.Context, id uint) ([]models.W
 
 // ========================================
 type WeatherRainfallRepository interface {
-	List(ctx context.Context) ([]models.Rainfall, error)
+	List(ctx context.Context, id uint) ([]models.Rainfall, error)
 }
 
 type weatherRainfallRepository struct {
@@ -42,10 +42,12 @@ func NewWeatherRainfallRepository(db *gorm.DB) WeatherRainfallRepository {
 	return &weatherRainfallRepository{db: db}
 }
 
-func (r *weatherRainfallRepository) List(ctx context.Context) ([]models.Rainfall, error) {
+func (r *weatherRainfallRepository) List(ctx context.Context, id uint) ([]models.Rainfall, error) {
 	var Rainfalls []models.Rainfall
 	err := r.db.WithContext(ctx).
-		Order("name ASC").
+		Where("location_id = ?", id).
+		Order("id DESC").
+		Limit(48 * 4).
 		Find(&Rainfalls).Error
 	return Rainfalls, err
 }

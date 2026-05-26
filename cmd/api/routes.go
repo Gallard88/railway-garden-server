@@ -53,5 +53,10 @@ func (app *application) routes() *gin.Engine {
 	weatherRecordHandler := handler.NewWeatherRecordHandler(weatherRecordService)
 	weatherRecordHandler.RegisterRoutes(v1)
 
+	weatherRainfallRepo := repository.NewWeatherRainfallRepository(app.db)
+	weatherRainfallService := service.NewWeatherRainfallService(weatherRainfallRepo)
+	weatherRainfallHandler := handler.NewWeatherRainfallHandler(weatherRainfallService)
+	weatherRainfallHandler.RegisterRoutes(v1)
+
 	return router
 }
