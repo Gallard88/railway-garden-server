@@ -84,3 +84,89 @@ func (s *plantZoneService) modelToResponse(zone *models.PlantZone) *dto.PlantZon
 		CreatedAt:     zone.CreatedAt,
 	}
 }
+
+// ================================================
+type PlantService interface {
+	GetPlant(ctx context.Context, id uint) (*dto.PlantResponse, error)
+	ListPlants(ctx context.Context) (*dto.ListPlantsResponse, error)
+	CreatePlant(ctx context.Context, req dto.CreatePlantRequest) (*dto.PlantResponse, error)
+	DeletePlant(ctx context.Context, id uint) error
+}
+
+type plantService struct {
+	plantRepo repository.PlantRepository
+}
+
+func NewPlantService(plantRepo repository.PlantRepository) PlantService {
+	return &plantService{
+		plantRepo: plantRepo,
+	}
+}
+
+// GetPlant - Get a single plant by ID
+func (s *plantService) GetPlant(ctx context.Context, id uint) (*dto.PlantResponse, error) {
+	plant, err := s.plantRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.modelToResponse(plant), nil
+}
+
+// ListPlants - Get all plants
+func (s *plantService) ListPlants(ctx context.Context) (*dto.ListPlantsResponse, error) {
+	plants, err := s.plantRepo.List(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch plants: %w", err)
+	}
+
+	// Convert models to DTOs
+	responses := make([]dto.PlantResponse, len(plants))
+	for i, plant := range plants {
+		responses[i] = *s.modelToResponse(&plant)
+	}
+
+	return &dto.ListPlantsResponse{
+		Plants: responses,
+		Count:  len(responses),
+	}, nil
+}
+
+// CreatePlant - Create a new plant
+func (s *plantService) CreatePlant(ctx context.Context, req dto.CreatePlantRequest) (*dto.PlantResponse, error) {
+	plant := &models.Plant{
+		Name:        req.Name,
+		Zone:        req.Zone,
+		WaterFreq:   req.WaterFreq,
+		PlantedDate: req.PlantedDate,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		LastWatered: time.Now(),
+		NextWater:   time.Now(),
+	}
+	// Save to database
+	if err := s.plantRepo.Create(ctx, plant); err != nil {
+		return nil, fmt.Errorf("failed to create plant: %w", err)
+	}
+
+	return s.modelToResponse(plant), nil
+}
+
+func (s *plantService) DeletePlant(ctx context.Context, id uint) error {
+	return s.plantRepo.DeletePlant(ctx, id)
+}
+
+// Helper: Convert model to DTO
+func (s *plantService) modelToResponse(plant *models.Plant) *dto.PlantResponse {
+	return &dto.PlantResponse{
+		ID:          plant.ID,
+		Name:        plant.Name,
+		Zone:        plant.Zone,
+		WaterFreq:   plant.WaterFreq,
+		PlantedDate: plant.PlantedDate,
+		CreatedAt:   plant.CreatedAt,
+		UpdatedAt:   plant.UpdatedAt,
+		LastWatered: plant.LastWatered,
+		NextWater:   plant.NextWater,
+	}
+}

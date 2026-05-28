@@ -40,7 +40,12 @@ func (app *application) routes() *gin.Engine {
 	v1 := router.Group("/v1")
 	locationHandler.RegisterRoutes(v1)
 
-	// Initialize plant zone repositories and services
+	// Initialize plant repositories and services
+	plantsRepo := repository.NewPlantRepository(app.db)
+	plantService := service.NewPlantService(plantsRepo)
+	plantHandler := handler.NewPlantHandler(plantService)
+	plantHandler.RegisterRoutes(v1)
+
 	zoneRepo := repository.NewPlantZoneRepository(app.db)
 	zoneService := service.NewPlantZoneService(zoneRepo)
 	zoneHandler := handler.NewPlantZoneHandler(zoneService)

@@ -45,3 +45,52 @@ func (r *plantZoneRepository) List(ctx context.Context) ([]models.PlantZone, err
 func (r *plantZoneRepository) Create(ctx context.Context, zone *models.PlantZone) error {
 	return r.db.WithContext(ctx).Create(zone).Error
 }
+
+// ================================================
+type PlantRepository interface {
+	FindByID(ctx context.Context, id uint) (*models.Plant, error)
+	List(ctx context.Context) ([]models.Plant, error)
+	Create(ctx context.Context, plant *models.Plant) error
+	DeletePlant(ctx context.Context, id uint) error
+}
+
+type plantRepository struct {
+	db *gorm.DB
+}
+
+func NewPlantRepository(db *gorm.DB) PlantRepository {
+	return &plantRepository{db: db}
+}
+
+func (r *plantRepository) FindByID(ctx context.Context, id uint) (*models.Plant, error) {
+	var plant models.Plant
+	err := r.db.WithContext(ctx).First(&plant, id).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.New("plant not found")
+		}
+		return nil, err
+	}
+	return &plant, nil
+}
+
+func (r *plantRepository) List(ctx context.Context) ([]models.Plant, error) {
+	var plants []models.Plant
+	err := r.db.WithContext(ctx).
+		Order("name ASC").
+		Find(&plants).Error
+	return plants, err
+}
+
+func (r *plantRepository) Create(ctx context.Context, plant *models.Plant) error {
+	return r.db.WithContext(ctx).Create(plant).Error
+}
+
+func (r *plantRepository) DeletePlant(ctx context.Context, id uint) error {
+	var plant models.Plant
+	err := r.db.WithContext(ctx).First(&plant, id).Error
+	if err != nil {
+		return err
+	}
+	return r.db.WithContext(ctx).Delete(&plant).Error
+}
