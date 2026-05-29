@@ -91,6 +91,7 @@ type PlantService interface {
 	ListPlants(ctx context.Context) (*dto.ListPlantsResponse, error)
 	CreatePlant(ctx context.Context, req dto.CreatePlantRequest) (*dto.PlantResponse, error)
 	DeletePlant(ctx context.Context, id uint) error
+	Water(ctx context.Context, id uint) (*dto.PlantResponse, error)
 }
 
 type plantService struct {
@@ -106,6 +107,16 @@ func NewPlantService(plantRepo repository.PlantRepository) PlantService {
 // GetPlant - Get a single plant by ID
 func (s *plantService) GetPlant(ctx context.Context, id uint) (*dto.PlantResponse, error) {
 	plant, err := s.plantRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.modelToResponse(plant), nil
+}
+
+// Water - Mark a plant as watered
+func (s *plantService) Water(ctx context.Context, id uint) (*dto.PlantResponse, error) {
+	plant, err := s.plantRepo.Water(ctx, id)
 	if err != nil {
 		return nil, err
 	}

@@ -17,6 +17,8 @@ import (
 
 const version = "0.0.1"
 
+// Handler → Service → Repository → Database
+
 type config struct {
 	port   int
 	env    string

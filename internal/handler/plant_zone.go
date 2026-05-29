@@ -169,15 +169,34 @@ func (h *PlantHandler) DeletePlant(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Plant deleted successfully", "plant": plant})
 }
 
+func (h *PlantHandler) WaterPlant(c *gin.Context) {
+	// 1. Parse ID from URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid plant ID"})
+		return
+	}
+
+	// 2. Call service
+	plant, err := h.plantService.Water(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 3. Return response
+	c.JSON(http.StatusOK, gin.H{"plant": plant})
+}
+
 // RegisterRoutes - Register all plant zone routes
 func (h *PlantHandler) RegisterRoutes(router *gin.RouterGroup) {
 	zones := router.Group("/plants")
 	{
-		zones.GET("", h.ListPlants)         // GET /v1/plants
-		zones.GET("/:id", h.GetPlant)       // GET /v1/plants/:id
-		zones.POST("", h.CreatePlant)       // POST /v1/plants
-		zones.DELETE("/:id", h.DeletePlant) // DELETE /v1/plants/:id
+		zones.GET("", h.ListPlants)           // GET /v1/plants
+		zones.GET("/:id", h.GetPlant)         // GET /v1/plants/:id
+		zones.POST("", h.CreatePlant)         // POST /v1/plants
+		zones.DELETE("/:id", h.DeletePlant)   // DELETE /v1/plants/:id
+		zones.PUT("/:id/water", h.WaterPlant) // PUT /v1/plants/:id/mark-watered
 		//		zones.PUT("/:id/", h.UpdatePlant)     // PUT /v1/plants/:id/mark-watered
-		//		zones.PUT("/:id/water", h.WaterPlant) // PUT /v1/plants/:id/mark-watered
 	}
 }

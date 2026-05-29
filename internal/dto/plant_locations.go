@@ -52,3 +52,8 @@ type ListPlantsResponse struct {
 	Plants []PlantResponse `json:"plants"`
 	Count  int             `json:"count"`
 }
+
+type WaterPlanResponse struct {
+	ID        uint      `json:"id"`
+	NextWater time.Time `json:"planted_date"`
+}
