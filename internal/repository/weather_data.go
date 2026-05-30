@@ -19,12 +19,17 @@ func NewWeatherRecordRepository(db *gorm.DB) WeatherRecordRepository {
 	return &weatherRecordRepository{db: db}
 }
 
+const readingsPerHour = 4
+const hoursPerDay = 24
+const numberOfDays = 7
+const maxRecords = readingsPerHour * hoursPerDay * numberOfDays // 48 hours of data
+
 func (r *weatherRecordRepository) List(ctx context.Context, id uint) ([]models.WeatherRecord, error) {
 	var WeatherRecords []models.WeatherRecord
 	err := r.db.WithContext(ctx).
 		Where("location_id = ?", id).
 		Order("id DESC").
-		Limit(48 * 4).
+		Limit(maxRecords).
 		Find(&WeatherRecords).Error
 	return WeatherRecords, err
 }
@@ -47,7 +52,7 @@ func (r *weatherRainfallRepository) List(ctx context.Context, id uint) ([]models
 	err := r.db.WithContext(ctx).
 		Where("location_id = ?", id).
 		Order("id DESC").
-		Limit(14).
+		Limit(numberOfDays).
 		Find(&Rainfalls).Error
 	return Rainfalls, err
 }
