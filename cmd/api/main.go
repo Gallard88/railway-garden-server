@@ -13,6 +13,8 @@ import (
 	"gorm.io/gorm"
 
 	"goapi.railway.app/internal/database"
+	"goapi.railway.app/internal/repository"
+	"goapi.railway.app/internal/service"
 )
 
 const version = "0.0.1"
@@ -30,6 +32,8 @@ type application struct {
 	logger *slog.Logger
 	db     *gorm.DB
 	cron   *cron.Cron
+
+	waterService service.PlantWateringService
 }
 
 func main() {
@@ -54,6 +58,11 @@ func main() {
 		logger: logger,
 		cron:   cronScheduler,
 		db:     db,
+		waterService: service.NewPlantWateringService(
+			repository.NewPlantRepository(db),
+			repository.NewWeatherRainfallRepository(db),
+			repository.NewPlantZoneRepository(db),
+		),
 	}
 
 	// Setup cron
@@ -107,9 +116,3 @@ func getEnv(key, defaultValue string) string {
 	}
 	return defaultValue
 }
-
-// Run every 15 minutes:
-//app.cron.AddFunc("*/15 * * * *", services.FetchWeatherForAllLocations)
-//services.FetchWeatherForAllLocations()
-//app.cron.AddFunc("* 20 * * *", services.FetchRainfallForAllLocations)
-//services.FetchRainfallForAllLocations()

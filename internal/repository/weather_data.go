@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"time"
 
 	"goapi.railway.app/internal/models"
 	"gorm.io/gorm"
@@ -19,10 +20,12 @@ func NewWeatherRecordRepository(db *gorm.DB) WeatherRecordRepository {
 	return &weatherRecordRepository{db: db}
 }
 
-const readingsPerHour = 4
-const hoursPerDay = 24
-const numberOfDays = 7
-const maxRecords = readingsPerHour * hoursPerDay * numberOfDays // 48 hours of data
+const (
+	readingsPerHour = 4
+	hoursPerDay     = 24
+	numberOfDays    = 7
+	maxRecords      = readingsPerHour * hoursPerDay * numberOfDays // 48 hours of data
+)
 
 func (r *weatherRecordRepository) List(ctx context.Context, id uint) ([]models.WeatherRecord, error) {
 	var WeatherRecords []models.WeatherRecord
@@ -37,6 +40,7 @@ func (r *weatherRecordRepository) List(ctx context.Context, id uint) ([]models.W
 // ========================================
 type WeatherRainfallRepository interface {
 	List(ctx context.Context, id uint) ([]models.Rainfall, error)
+	RainfallForLocationAndDate(ctx context.Context, locationId uint, date time.Time) (models.Rainfall, error)
 }
 
 type weatherRainfallRepository struct {
@@ -54,5 +58,14 @@ func (r *weatherRainfallRepository) List(ctx context.Context, id uint) ([]models
 		Order("id DESC").
 		Limit(numberOfDays).
 		Find(&Rainfalls).Error
+	return Rainfalls, err
+}
+
+func (r *weatherRainfallRepository) RainfallForLocationAndDate(ctx context.Context, locationId uint, date time.Time) (models.Rainfall, error) {
+	var Rainfalls models.Rainfall
+	err := r.db.WithContext(ctx).
+		Where("location_id = ?", locationId).
+		Where("time = ?", date).
+		First(&Rainfalls).Error
 	return Rainfalls, err
 }

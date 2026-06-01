@@ -12,6 +12,7 @@ import (
 type PlantZoneRepository interface {
 	FindByID(ctx context.Context, id uint) (*models.PlantZone, error)
 	List(ctx context.Context) ([]models.PlantZone, error)
+	ListExposedToRainfall(ctx context.Context) ([]models.PlantZone, error)
 	Create(ctx context.Context, zone *models.PlantZone) error
 }
 
@@ -43,6 +44,15 @@ func (r *plantZoneRepository) List(ctx context.Context) ([]models.PlantZone, err
 	return zones, err
 }
 
+func (r *plantZoneRepository) ListExposedToRainfall(ctx context.Context) ([]models.PlantZone, error) {
+	var zones []models.PlantZone
+	err := r.db.WithContext(ctx).
+		Where("outdoor = true and rain_threshold > 0").
+		Order("name ASC").
+		Find(&zones).Error
+	return zones, err
+}
+
 func (r *plantZoneRepository) Create(ctx context.Context, zone *models.PlantZone) error {
 	return r.db.WithContext(ctx).Create(zone).Error
 }
@@ -54,6 +64,7 @@ type PlantRepository interface {
 	Create(ctx context.Context, plant *models.Plant) error
 	DeletePlant(ctx context.Context, id uint) error
 	Water(ctx context.Context, id uint) (*models.Plant, error)
+	FindByZone(ctx context.Context, zoneID uint) ([]models.Plant, error)
 }
 
 type plantRepository struct {
@@ -95,6 +106,14 @@ func (r *plantRepository) DeletePlant(ctx context.Context, id uint) error {
 		return err
 	}
 	return r.db.WithContext(ctx).Delete(&plant).Error
+}
+
+func (r *plantRepository) FindByZone(ctx context.Context, zoneID uint) ([]models.Plant, error) {
+	var plants []models.Plant
+	err := r.db.WithContext(ctx).
+		Where("zone_id = ?", zoneID).
+		Find(&plants).Error
+	return plants, err
 }
 
 func (r *plantRepository) Water(ctx context.Context, id uint) (*models.Plant, error) {
