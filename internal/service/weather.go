@@ -167,7 +167,7 @@ func fetchAndStoreRainfall(db *gorm.DB, location models.WeatherLocation) error {
 	endDate := now.AddDate(0, 0, 1).Format("2006-01-02")
 	// Call Open-Meteo API
 	url := fmt.Sprintf(
-		"https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&start_date=%s&end_date=%s&daily=precipitation_sum",
+		"https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&start_date=%s&end_date=%s&daily=precipitation_sum&timezone=Australia/Sydney",
 		location.Latitude,
 		location.Longitude,
 		startDate,
