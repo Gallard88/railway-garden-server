@@ -165,7 +165,7 @@ func fetchAndStoreRainfall(db *gorm.DB, location models.WeatherLocation) error {
 	// Start date: 3 days ago
 	loc, _ := time.LoadLocation("Australia/Sydney")
 	now := time.Now().In(loc)
-	startDate := now.AddDate(0, 0, -14).Format("2006-01-02")
+	startDate := now.AddDate(0, 0, -2).Format("2006-01-02")
 	endDate := now.Format("2006-01-02")
 
 	// Call Open-Meteo API
