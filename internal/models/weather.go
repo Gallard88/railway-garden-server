@@ -55,11 +55,12 @@ url := "https://api.open-meteo.com/v1/forecast?latitude=-33.87&longitude=151.21&
 */
 
 type Rainfall struct {
-	ID            uint      `gorm:"primaryKey" json:"id"`
-	LocationID    uint      `gorm:"not null;uniqueIndex:idx_location_time" json:"location_id"`
-	Time          time.Time `gorm:"uniqueIndex:idx_location_time" json:"time"`
-	Precipitation float64   `json:"precipitation"`
-	CreatedAt     time.Time `json:"created_at"`
+	ID                 uint      `gorm:"primaryKey" json:"id"`
+	LocationID         uint      `gorm:"not null;uniqueIndex:idx_location_time" json:"location_id"`
+	Time               time.Time `gorm:"uniqueIndex:idx_location_time" json:"time"`
+	Precipitation      float64   `json:"precipitation"`
+	Evapotranspiration float64   `json:"evapotranspiration"`
+	CreatedAt          time.Time `json:"created_at"`
 }
 
 /*

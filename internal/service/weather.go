@@ -138,8 +138,9 @@ type DailyUnits struct {
 }
 
 type DailyData struct {
-	Time             []Date    `json:"time"`
-	PrecipitationSum []float64 `json:"precipitation_sum"`
+	Time               []Date    `json:"time"`
+	PrecipitationSum   []float64 `json:"precipitation_sum"`
+	Evapotranspiration []float64 `json:"et0_fao_evapotranspiration"`
 }
 
 // FetchRainfallForAllLocations polls weather for all locations
@@ -162,12 +163,14 @@ func FetchRainfallForAllLocations(db *gorm.DB) {
 func fetchAndStoreRainfall(db *gorm.DB, location models.WeatherLocation) error {
 
 	// Start date: 3 days ago
-	now := time.Now()
-	startDate := now.AddDate(0, 0, -2).Format("2006-01-02")
-	endDate := now.AddDate(0, 0, 1).Format("2006-01-02")
+	loc, _ := time.LoadLocation("Australia/Sydney")
+	now := time.Now().In(loc)
+	startDate := now.AddDate(0, 0, -14).Format("2006-01-02")
+	endDate := now.Format("2006-01-02")
+
 	// Call Open-Meteo API
 	url := fmt.Sprintf(
-		"https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&start_date=%s&end_date=%s&daily=precipitation_sum&timezone=Australia/Sydney",
+		"https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&start_date=%s&end_date=%s&daily=precipitation_sum,et0_fao_evapotranspiration&timezone=Australia/Sydney",
 		location.Latitude,
 		location.Longitude,
 		startDate,
@@ -192,17 +195,19 @@ func fetchAndStoreRainfall(db *gorm.DB, location models.WeatherLocation) error {
 	// Now you can use parsedTimes
 	for i, t := range response.Daily.Time {
 		rainfall := response.Daily.PrecipitationSum[i]
-		fmt.Printf("%s: %.1f mm\n", t.Time().Format("2006-01-02"), rainfall)
+		evapotranspiration := response.Daily.Evapotranspiration[i]
+		fmt.Printf("%s: %.1f mm, %.1f mm\n", t.Time().Format("2006-01-02"), rainfall, evapotranspiration)
 
 		r := models.Rainfall{
-			LocationID:    location.ID,
-			Time:          t.Time(),
-			Precipitation: rainfall,
-			CreatedAt:     time.Now(),
+			LocationID:         location.ID,
+			Time:               t.Time(),
+			Precipitation:      rainfall,
+			Evapotranspiration: evapotranspiration,
+			CreatedAt:          time.Now(),
 		}
 		if err := db.Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "location_id"}, {Name: "time"}},
-			DoUpdates: clause.AssignmentColumns([]string{"precipitation"}),
+			DoUpdates: clause.AssignmentColumns([]string{"precipitation", "evapotranspiration"}),
 		}).Create(&r).Error; err != nil {
 			return fmt.Errorf("failed to save rainfall: %w", err)
 		}

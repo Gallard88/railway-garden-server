@@ -26,7 +26,7 @@ func (app *application) setupCronJobs() {
 	}
 	app.fetchRainfallForAllLocations(app.db)
 
-	_, err = app.cron.AddFunc("CRON_TZ=Australia/Sydney 0 6 * * *", func() {
+	_, err = app.cron.AddFunc("CRON_TZ=Australia/Sydney 0 6,18 * * *", func() {
 		log.Println("Running task: fetchRainfallForAllLocations() ")
 		app.waterService.ProcessRainfallEvent(ctx)
 	})
