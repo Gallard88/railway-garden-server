@@ -90,8 +90,9 @@ func (s *weatherRainfallService) ListRecords(ctx context.Context, id uint) (*dto
 // Helper: Convert model to DTO
 func (s *weatherRainfallService) modelToResponse(record *models.Rainfall) *dto.WeatherRainfallResponse {
 	return &dto.WeatherRainfallResponse{
-		ID:            record.ID,
-		Time:          record.Time,
-		Precipitation: record.Precipitation,
+		ID:                 record.ID,
+		Time:               record.Time,
+		Precipitation:      record.Precipitation,
+		Evapotranspiration: record.Evapotranspiration,
 	}
 }

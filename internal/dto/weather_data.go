@@ -19,9 +19,10 @@ type ListWeatherRecordsResponse struct {
 
 // =============================================
 type WeatherRainfallResponse struct {
-	ID            uint      `json:"id"`
-	Time          time.Time `json:"time"`
-	Precipitation float64   `json:"precipitation"`
+	ID                 uint      `json:"id"`
+	Time               time.Time `json:"time"`
+	Precipitation      float64   `json:"precipitation"`
+	Evapotranspiration float64   `json:"evapotranspiration"`
 }
 
 // ListWeatherLocationsResponse - List all locations

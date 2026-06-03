@@ -31,7 +31,7 @@ func (r *weatherRecordRepository) List(ctx context.Context, id uint) ([]models.W
 	var WeatherRecords []models.WeatherRecord
 	err := r.db.WithContext(ctx).
 		Where("location_id = ?", id).
-		Order("id DESC").
+		Order("time DESC").
 		Limit(maxRecords).
 		Find(&WeatherRecords).Error
 	return WeatherRecords, err
@@ -55,7 +55,7 @@ func (r *weatherRainfallRepository) List(ctx context.Context, id uint) ([]models
 	var Rainfalls []models.Rainfall
 	err := r.db.WithContext(ctx).
 		Where("location_id = ?", id).
-		Order("id DESC").
+		Order("time DESC").
 		Limit(numberOfDays).
 		Find(&Rainfalls).Error
 	return Rainfalls, err
@@ -66,6 +66,7 @@ func (r *weatherRainfallRepository) RainfallForLocationAndDate(ctx context.Conte
 	err := r.db.WithContext(ctx).
 		Where("location_id = ?", locationId).
 		Where("time = ?", date).
+		Order("time DESC").
 		First(&Rainfalls).Error
 	return Rainfalls, err
 }
