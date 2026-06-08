@@ -1,11 +1,14 @@
 package handler
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"goapi.railway.app/internal/dto"
+	"goapi.railway.app/internal/models"
 	"goapi.railway.app/internal/service"
 )
 
@@ -113,6 +116,34 @@ func (h *PlantHandler) GetPlant(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"plant": plant})
 }
 
+func (h *PlantHandler) UpdatePlant(c *gin.Context) {
+	// 1. Parse ID from URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid plant ID"})
+		return
+	}
+
+	var plant models.Plant
+	if err := json.NewDecoder(c.Request.Body).Decode(&plant); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Errorf("failed to parse response: %w", err)})
+		return
+	}
+
+	fmt.Printf("jsonData: %+v\n", c.Request.Body)
+	fmt.Printf("plant: %+v\n", plant)
+
+	// 2. Call service
+	updatedPlant, err := h.plantService.UpdatePlant(c.Request.Context(), uint(id), plant)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 3. Return response
+	c.JSON(http.StatusOK, gin.H{"plant": updatedPlant})
+}
+
 // ListPlants - GET /v1/plants
 func (h *PlantHandler) ListPlants(c *gin.Context) {
 	// Call service
@@ -194,6 +225,7 @@ func (h *PlantHandler) RegisterRoutes(router *gin.RouterGroup) {
 	{
 		zones.GET("", h.ListPlants)           // GET /v1/plants
 		zones.GET("/:id", h.GetPlant)         // GET /v1/plants/:id
+		zones.PUT("/:id", h.UpdatePlant)      // PUT /v1/plants/:id
 		zones.POST("", h.CreatePlant)         // POST /v1/plants
 		zones.DELETE("/:id", h.DeletePlant)   // DELETE /v1/plants/:id
 		zones.PUT("/:id/water", h.WaterPlant) // PUT /v1/plants/:id/mark-watered

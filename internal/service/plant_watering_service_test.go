@@ -46,6 +46,15 @@ func (m *MockPlantRepository) List(ctx context.Context) ([]models.Plant, error) 
 	}
 	return args.Get(0).([]models.Plant), args.Error(1)
 }
+
+func (m *MockPlantRepository) Update(ctx context.Context, updatedPlanr models.Plant) error {
+	args := m.Called(ctx)
+	if args.Get(0) == nil {
+		return args.Error(1)
+	}
+	return args.Error(1)
+}
+
 func (m *MockPlantRepository) Create(ctx context.Context, plant *models.Plant) error {
 	args := m.Called(ctx, plant)
 	return args.Error(0)

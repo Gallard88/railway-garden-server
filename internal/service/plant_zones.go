@@ -88,6 +88,7 @@ func (s *plantZoneService) modelToResponse(zone *models.PlantZone) *dto.PlantZon
 // ================================================
 type PlantService interface {
 	GetPlant(ctx context.Context, id uint) (*dto.PlantResponse, error)
+	UpdatePlant(ctx context.Context, id uint, plant models.Plant) (*dto.PlantResponse, error)
 	ListPlants(ctx context.Context) (*dto.ListPlantsResponse, error)
 	CreatePlant(ctx context.Context, req dto.CreatePlantRequest) (*dto.PlantResponse, error)
 	DeletePlant(ctx context.Context, id uint) error
@@ -112,6 +113,54 @@ func (s *plantService) GetPlant(ctx context.Context, id uint) (*dto.PlantRespons
 	}
 
 	return s.modelToResponse(plant), nil
+}
+
+func (s *plantService) UpdatePlant(ctx context.Context, id uint, updatedPlant models.Plant) (*dto.PlantResponse, error) {
+
+	// Get Plant
+	plant, err := s.plantRepo.FindByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Business rule validation
+	if updatedPlant.ContainerType != models.ContainerType_Pot && updatedPlant.ContainerType != models.ContainerType_Ground {
+		return nil, fmt.Errorf("containter type must be (%s,%s)", models.ContainerType_Pot, models.ContainerType_Ground)
+	}
+	if updatedPlant.SunExposure != models.Sun_FullSun && updatedPlant.SunExposure != models.Sun_PartSun && updatedPlant.SunExposure != models.Sun_FullShade {
+		return nil, fmt.Errorf("Sun Exposure type must be (%s,%s,%s)", models.Sun_FullSun, models.Sun_PartSun, models.Sun_FullShade)
+	}
+	if updatedPlant.SoilType != models.Soil_Sandy && updatedPlant.SoilType != models.Soil_Clay && updatedPlant.SoilType != models.Soil_Loam {
+		return nil, fmt.Errorf("SoilType type must be (%s,%s,%s)", models.Soil_Sandy, models.Soil_Clay, models.Soil_Loam)
+	}
+	if updatedPlant.ET0 <= 0 || updatedPlant.ET0 > 1.0 {
+		return nil, fmt.Errorf("ETO0 must be between 0 & 1")
+	}
+	if updatedPlant.DeficitThreshold <= 0 || updatedPlant.DeficitThreshold > 100.0 {
+		return nil, fmt.Errorf("DeficitThreshold must be between 0 & 100 mm")
+	}
+	if updatedPlant.LookbackDays < 1 || updatedPlant.LookbackDays > 7 {
+		return nil, fmt.Errorf("LookbackDays must be between 1 & 7 days")
+	}
+	if updatedPlant.RainfallEffectiveness < 0 || updatedPlant.RainfallEffectiveness > 1.0 {
+		return nil, fmt.Errorf("RainfallEffectiveness must be between 0 & 1")
+	}
+
+	// Update the appropriate fields.
+	updatedPlant.CreatedAt = plant.CreatedAt
+	updatedPlant.ID = plant.ID // to be sure.
+	updatedPlant.UpdatedAt = time.Now()
+	updatedPlant.LastWatered = plant.LastWatered
+	updatedPlant.NextWater = plant.NextWater
+
+	// Save to the DB.
+	err = s.plantRepo.Update(ctx, updatedPlant)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return
+	return s.modelToResponse(&updatedPlant), nil
 }
 
 // Water - Mark a plant as watered

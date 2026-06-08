@@ -62,6 +62,7 @@ type PlantRepository interface {
 	FindByID(ctx context.Context, id uint) (*models.Plant, error)
 	List(ctx context.Context) ([]models.Plant, error)
 	Create(ctx context.Context, plant *models.Plant) error
+	Update(ctx context.Context, updatedPlant models.Plant) error
 	DeletePlant(ctx context.Context, id uint) error
 	Water(ctx context.Context, id uint) (*models.Plant, error)
 	FindByZone(ctx context.Context, zoneID uint) ([]models.Plant, error)
@@ -114,6 +115,18 @@ func (r *plantRepository) FindByZone(ctx context.Context, zoneID uint) ([]models
 		Where("zone_id = ?", zoneID).
 		Find(&plants).Error
 	return plants, err
+}
+
+func (r *plantRepository) Update(ctx context.Context, updatedPlant models.Plant) error {
+	err := r.db.WithContext(ctx).Save(&updatedPlant).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return errors.New("plant failed to update")
+		}
+		return err
+	}
+	return nil
+
 }
 
 func (r *plantRepository) Water(ctx context.Context, id uint) (*models.Plant, error) {
