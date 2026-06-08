@@ -146,14 +146,21 @@ func (s *plantService) ListPlants(ctx context.Context) (*dto.ListPlantsResponse,
 // CreatePlant - Create a new plant
 func (s *plantService) CreatePlant(ctx context.Context, req dto.CreatePlantRequest) (*dto.PlantResponse, error) {
 	plant := &models.Plant{
-		Name:        req.Name,
-		Zone:        req.Zone,
-		WaterFreq:   req.WaterFreq,
-		PlantedDate: req.PlantedDate,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		LastWatered: time.Now(),
-		NextWater:   time.Now(),
+		Name:                  req.Name,
+		Zone:                  req.Zone,
+		WaterFreq:             req.WaterFreq,
+		PlantedDate:           req.PlantedDate,
+		CreatedAt:             time.Now(),
+		UpdatedAt:             time.Now(),
+		LastWatered:           time.Now(),
+		NextWater:             time.Now(),
+		ContainerType:         models.ContainerType_Pot, // in-ground or pot
+		SunExposure:           models.Sun_FullSun,       // exposed, part shade, full shade
+		SoilType:              models.Soil_Loam,         // sandy, loam, clay
+		ET0:                   1.0,                      // derived from sun exposure (1.0 / 0.6 / 0.3)
+		DeficitThreshold:      5,                        // mm of deficit before watering triggered (lower for sandy, higher for clay)
+		LookbackDays:          1,                        // 1 for pots, 3-5 for in-ground
+		RainfallEffectiveness: 1.0,                      // how much rainfall actually reaches the zone (pots under eaves etc), default 1.0
 	}
 	// Save to database
 	if err := s.plantRepo.Create(ctx, plant); err != nil {
@@ -170,14 +177,21 @@ func (s *plantService) DeletePlant(ctx context.Context, id uint) error {
 // Helper: Convert model to DTO
 func (s *plantService) modelToResponse(plant *models.Plant) *dto.PlantResponse {
 	return &dto.PlantResponse{
-		ID:          plant.ID,
-		Name:        plant.Name,
-		Zone:        plant.Zone,
-		WaterFreq:   plant.WaterFreq,
-		PlantedDate: plant.PlantedDate,
-		CreatedAt:   plant.CreatedAt,
-		UpdatedAt:   plant.UpdatedAt,
-		LastWatered: plant.LastWatered,
-		NextWater:   plant.NextWater,
+		ID:                    plant.ID,
+		Name:                  plant.Name,
+		Zone:                  plant.Zone,
+		WaterFreq:             plant.WaterFreq,
+		PlantedDate:           plant.PlantedDate,
+		CreatedAt:             plant.CreatedAt,
+		UpdatedAt:             plant.UpdatedAt,
+		LastWatered:           plant.LastWatered,
+		NextWater:             plant.NextWater,
+		ContainerType:         plant.ContainerType,
+		SunExposure:           plant.SunExposure,
+		SoilType:              plant.SoilType,
+		ET0:                   plant.ET0,
+		DeficitThreshold:      plant.DeficitThreshold,
+		LookbackDays:          plant.LookbackDays,
+		RainfallEffectiveness: plant.RainfallEffectiveness,
 	}
 }

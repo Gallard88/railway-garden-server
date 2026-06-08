@@ -28,15 +28,23 @@ type ListPlantZonesResponse struct {
 
 // ================================================
 type PlantResponse struct {
-	ID          uint      `json:"id"`
-	Name        string    `json:"name"`
-	Zone        uint      `json:"zone"`
-	WaterFreq   float64   `json:"water_freq"`
-	PlantedDate time.Time `json:"planted_date"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
-	LastWatered time.Time `json:"last_watered"`
-	NextWater   time.Time `json:"next_water"`
+	ID                    uint      `json:"id"`
+	Name                  string    `json:"name"`
+	Zone                  uint      `json:"zone"`
+	WaterFreq             float64   `json:"water_freq"`
+	PlantedDate           time.Time `json:"planted_date"`
+	CreatedAt             time.Time `json:"created_at"`
+	UpdatedAt             time.Time `json:"updated_at"`
+	LastWatered           time.Time `json:"last_watered"`
+	NextWater             time.Time `json:"next_water"`
+	ContainerType         string    `json:"container_type"`         // in-ground or pot
+	SunExposure           string    `json:"sun_exposure"`           // exposed, part shade, full shade
+	SoilType              string    `json:"soil_type"`              // sandy, loam, clay
+	ET0                   float64   `json:"et0_multiplier"`         // derived from sun exposure (1.0 / 0.6 / 0.3)
+	DeficitThreshold      float64   `json:"deficit_threshold"`      // mm of deficit before watering triggered (lower for sandy, higher for clay)
+	LookbackDays          uint      `json:"lookback_days"`          // 1 for pots, 3-5 for in-ground
+	RainfallEffectiveness float64   `json:"rainfall_effectiveness"` // how much rainfall actually reaches the zone (pots under eaves etc), default 1.0
+
 }
 
 // CreatePlantRequest - For creating new plants
