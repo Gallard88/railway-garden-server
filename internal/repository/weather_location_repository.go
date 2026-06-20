@@ -37,7 +37,7 @@ func (r *weatherLocationRepository) FindByID(ctx context.Context, id uint) (*mod
 func (r *weatherLocationRepository) List(ctx context.Context) ([]models.WeatherLocation, error) {
 	var locations []models.WeatherLocation
 	err := r.db.WithContext(ctx).
-		Order("name ASC").
+		Order("name DESC").
 		Find(&locations).Error
 	return locations, err
 }
