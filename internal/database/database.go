@@ -61,5 +61,6 @@ func runMigrations(db *gorm.DB) error {
 		&models.WeatherLocation{},
 		&models.WeatherRecord{},
 		&models.Rainfall{},
+		&models.PlantHistory{},
 	)
 }
