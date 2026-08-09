@@ -114,8 +114,12 @@ func (s *plantService) GetPlant(ctx context.Context, id uint) (*dto.PlantRespons
 	if err != nil {
 		return nil, err
 	}
+	history, err := s.plantRepo.ReadHistory(ctx, id)
+	if err != nil {
+		return nil, err
+	}
 
-	return s.modelToResponse(plant), nil
+	return s.modelToResponse(plant, history), nil
 }
 
 func (s *plantService) UpdatePlant(ctx context.Context, id uint, updatedPlant models.Plant) (*dto.PlantResponse, error) {
@@ -161,9 +165,13 @@ func (s *plantService) UpdatePlant(ctx context.Context, id uint, updatedPlant mo
 	if err != nil {
 		return nil, err
 	}
+	history, err := s.plantRepo.ReadHistory(ctx, id)
+	if err != nil {
+		return nil, err
+	}
 
 	// Return
-	return s.modelToResponse(&updatedPlant), nil
+	return s.modelToResponse(&updatedPlant, history), nil
 }
 
 // Water - Mark a plant as watered
@@ -172,8 +180,12 @@ func (s *plantService) Water(ctx context.Context, id uint) (*dto.PlantResponse, 
 	if err != nil {
 		return nil, err
 	}
+	history, err := s.plantRepo.ReadHistory(ctx, id)
+	if err != nil {
+		return nil, err
+	}
 
-	return s.modelToResponse(plant), nil
+	return s.modelToResponse(plant, history), nil
 }
 
 // ListPlants - Get all plants
@@ -186,7 +198,12 @@ func (s *plantService) ListPlants(ctx context.Context) (*dto.ListPlantsResponse,
 	// Convert models to DTOs
 	responses := make([]dto.PlantResponse, len(plants))
 	for i, plant := range plants {
-		responses[i] = *s.modelToResponse(&plant)
+		history, err := s.plantRepo.ReadHistory(ctx, plant.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		responses[i] = *s.modelToResponse(&plant, history)
 	}
 
 	return &dto.ListPlantsResponse{
@@ -218,8 +235,7 @@ func (s *plantService) CreatePlant(ctx context.Context, req dto.CreatePlantReque
 	if err := s.plantRepo.Create(ctx, plant); err != nil {
 		return nil, fmt.Errorf("failed to create plant: %w", err)
 	}
-
-	return s.modelToResponse(plant), nil
+	return s.modelToResponse(plant, []models.PlantHistory{}), nil
 }
 
 func (s *plantService) DeletePlant(ctx context.Context, id uint) error {
@@ -254,7 +270,7 @@ func (s *plantService) CreateHistoryEvent(ctx context.Context, req dto.WriteHist
 }
 
 // Helper: Convert model to DTO
-func (s *plantService) modelToResponse(plant *models.Plant) *dto.PlantResponse {
+func (s *plantService) modelToResponse(plant *models.Plant, history []models.PlantHistory) *dto.PlantResponse {
 	return &dto.PlantResponse{
 		ID:                    plant.ID,
 		Name:                  plant.Name,
@@ -272,5 +288,6 @@ func (s *plantService) modelToResponse(plant *models.Plant) *dto.PlantResponse {
 		DeficitThreshold:      plant.DeficitThreshold,
 		LookbackDays:          plant.LookbackDays,
 		RainfallEffectiveness: plant.RainfallEffectiveness,
+		Log:                   history,
 	}
 }
