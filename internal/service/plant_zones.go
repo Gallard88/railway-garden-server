@@ -93,6 +93,9 @@ type PlantService interface {
 	CreatePlant(ctx context.Context, req dto.CreatePlantRequest) (*dto.PlantResponse, error)
 	DeletePlant(ctx context.Context, id uint) error
 	Water(ctx context.Context, id uint) (*dto.PlantResponse, error)
+
+	ReadHistory(ctx context.Context, id uint) (*dto.PlantHistoryResponse, error)
+	CreateHistoryEvent(ctx context.Context, event dto.WriteHistoryRequest) (bool, error)
 }
 
 type plantService struct {
@@ -221,6 +224,33 @@ func (s *plantService) CreatePlant(ctx context.Context, req dto.CreatePlantReque
 
 func (s *plantService) DeletePlant(ctx context.Context, id uint) error {
 	return s.plantRepo.DeletePlant(ctx, id)
+}
+
+// ReadHistory - Get a single zone by ID
+func (s *plantService) ReadHistory(ctx context.Context, id uint) (*dto.PlantHistoryResponse, error) {
+	history, err := s.plantRepo.ReadHistory(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.PlantHistoryResponse{Log: history}, nil
+}
+
+// CreateHistoryEvent - Create a new zone
+func (s *plantService) CreateHistoryEvent(ctx context.Context, req dto.WriteHistoryRequest) (bool, error) {
+	entry := &models.PlantHistory{
+		PlantId:     req.PlantId,
+		Name:        req.Name,
+		Description: req.Description,
+		Agent:       req.Agent,
+	}
+
+	// Save to database
+	if err := s.plantRepo.CreateHistoryEvent(ctx, entry); err != nil {
+		return false, fmt.Errorf("failed to create hitory entry: %w", err)
+	}
+
+	return true, nil
 }
 
 // Helper: Convert model to DTO

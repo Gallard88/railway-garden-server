@@ -66,6 +66,10 @@ type PlantRepository interface {
 	DeletePlant(ctx context.Context, id uint) error
 	Water(ctx context.Context, id uint) (*models.Plant, error)
 	FindByZone(ctx context.Context, zoneID uint) ([]models.Plant, error)
+
+	// History related functions
+	ReadHistory(ctx context.Context, plantId uint) ([]models.PlantHistory, error)
+	CreateHistoryEvent(ctx context.Context, event *models.PlantHistory) error
 }
 
 type plantRepository struct {
@@ -152,4 +156,18 @@ func (r *plantRepository) Water(ctx context.Context, id uint) (*models.Plant, er
 	}
 
 	return &plant, nil
+}
+
+func (p *plantRepository) ReadHistory(ctx context.Context, plantId uint) ([]models.PlantHistory, error) {
+	var history []models.PlantHistory
+	err := p.db.WithContext(ctx).
+		Where("plant_id = ?", plantId).
+		Order("created_at desc").
+		Find(&history).Error
+	return history, err
+}
+
+func (p *plantRepository) CreateHistoryEvent(ctx context.Context, event *models.PlantHistory) error {
+	// TODO: Verify that plant id is real!
+	return p.db.WithContext(ctx).Create(event).Error
 }

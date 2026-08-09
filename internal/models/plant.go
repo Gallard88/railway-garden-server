@@ -44,3 +44,12 @@ type PlantZone struct {
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
+
+type PlantHistory struct {
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	PlantId     uint      `json:"plant_id"`
+	CreatedAt   time.Time `json:"created_at"`
+	Name        string    `gorm:"not null" json:"name"`
+	Description string    `json:"description"`
+	Agent       string    `json:"agent"`
+}

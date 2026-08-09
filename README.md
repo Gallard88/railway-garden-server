@@ -7,6 +7,5 @@ go build -o railway-garden-server.exe ./cmd/api
 
 
 Plant History works. 
-* Merge history into other plant files. 
 * When watering plants, make a history log. 
 * When getting plant data, embed history information. 

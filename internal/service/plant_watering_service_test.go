@@ -64,6 +64,26 @@ func (m *MockPlantRepository) DeletePlant(ctx context.Context, id uint) error {
 	return args.Error(0)
 }
 
+func (m *MockPlantRepository) ReadHistory(ctx context.Context, plantId uint) ([]models.PlantHistory, error) {
+	return []models.PlantHistory{
+		{
+			ID:          1,
+			PlantId:     1,
+			CreatedAt:   time.Now(),
+			Name:        "Mock event",
+			Description: "Mock description",
+			Agent:       "mock@mock.com.au",
+		},
+	}, nil
+}
+
+func (m *MockPlantRepository) CreateHistoryEvent(ctx context.Context, event *models.PlantHistory) error {
+	// TODO: Verify that plant id is real!
+	return nil
+}
+
+/* ========================================= */
+
 type MockRainfallRepository struct {
 	mock.Mock
 }
