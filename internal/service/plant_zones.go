@@ -92,7 +92,7 @@ type PlantService interface {
 	ListPlants(ctx context.Context) (*dto.ListPlantsResponse, error)
 	CreatePlant(ctx context.Context, req dto.CreatePlantRequest) (*dto.PlantResponse, error)
 	DeletePlant(ctx context.Context, id uint) error
-	Water(ctx context.Context, id uint) (*dto.PlantResponse, error)
+	Water(ctx context.Context, id uint, agent string) (*dto.PlantResponse, error)
 
 	ReadHistory(ctx context.Context, id uint) (*dto.PlantHistoryResponse, error)
 	CreateHistoryEvent(ctx context.Context, event dto.WriteHistoryRequest) (bool, error)
@@ -175,11 +175,17 @@ func (s *plantService) UpdatePlant(ctx context.Context, id uint, updatedPlant mo
 }
 
 // Water - Mark a plant as watered
-func (s *plantService) Water(ctx context.Context, id uint) (*dto.PlantResponse, error) {
+func (s *plantService) Water(ctx context.Context, id uint, agent string) (*dto.PlantResponse, error) {
 	plant, err := s.plantRepo.Water(ctx, id)
 	if err != nil {
 		return nil, err
 	}
+	s.plantRepo.CreateHistoryEvent(ctx, &models.PlantHistory{
+		PlantId:     uint(id),
+		Name:        "Watered Plant",
+		Description: "Manual",
+		Agent:       agent,
+	})
 	history, err := s.plantRepo.ReadHistory(ctx, id)
 	if err != nil {
 		return nil, err

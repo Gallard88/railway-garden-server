@@ -202,6 +202,7 @@ func (h *PlantHandler) DeletePlant(c *gin.Context) {
 
 func (h *PlantHandler) WaterPlant(c *gin.Context) {
 	// 1. Parse ID from URL
+	agent := c.GetHeader("agent-id")
 	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid plant ID"})
@@ -209,7 +210,7 @@ func (h *PlantHandler) WaterPlant(c *gin.Context) {
 	}
 
 	// 2. Call service
-	plant, err := h.plantService.Water(c.Request.Context(), uint(id))
+	plant, err := h.plantService.Water(c.Request.Context(), uint(id), agent)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
