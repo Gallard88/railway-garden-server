@@ -53,6 +53,7 @@ func (r *weatherRecordRepository) ListByTime(ctx context.Context, id uint, t tim
 type WeatherRainfallRepository interface {
 	List(ctx context.Context, id uint) ([]models.Rainfall, error)
 	RainfallForLocationAndDate(ctx context.Context, locationId uint, date time.Time) (models.Rainfall, error)
+	HistoricRainfall(ctx context.Context, locationId uint, date time.Time) ([]models.Rainfall, error)
 }
 
 type weatherRainfallRepository struct {
@@ -81,4 +82,14 @@ func (r *weatherRainfallRepository) RainfallForLocationAndDate(ctx context.Conte
 		Order("time DESC").
 		First(&Rainfalls).Error
 	return Rainfalls, err
+}
+
+func (r *weatherRainfallRepository) HistoricRainfall(ctx context.Context, locationId uint, date time.Time) ([]models.Rainfall, error) {
+	var rain []models.Rainfall
+	err := r.db.WithContext(ctx).
+		Where("location_id = ?", locationId).
+		Where("time >= ?", date).
+		Order("time DESC").
+		Find(&rain).Error
+	return rain, err
 }

@@ -67,7 +67,7 @@ type PlantRepository interface {
 	DeletePlant(ctx context.Context, id uint) error
 	Water(ctx context.Context, id uint) (*models.Plant, error)
 	FindByZone(ctx context.Context, zoneID uint) ([]models.Plant, error)
-	MarkOverheated(ctx context.Context, plantId uint, msg string) error
+	MarkNeedsWatering(ctx context.Context, plantId uint, reason, description string) error
 
 	// History related functions
 	ReadHistory(ctx context.Context, plantId uint) ([]models.PlantHistory, error)
@@ -131,7 +131,7 @@ func (r *plantRepository) FindByZone(ctx context.Context, zoneID uint) ([]models
 	return plants, err
 }
 
-func (r *plantRepository) MarkOverheated(ctx context.Context, plantId uint, msg string) error {
+func (r *plantRepository) MarkNeedsWatering(ctx context.Context, plantId uint, reason, description string) error {
 	now := time.Now()
 
 	result := r.db.WithContext(ctx).
@@ -151,8 +151,8 @@ func (r *plantRepository) MarkOverheated(ctx context.Context, plantId uint, msg 
 	return r.db.WithContext(ctx).Create(&models.PlantHistory{
 		PlantId:     plantId,
 		CreatedAt:   time.Now(),
-		Name:        "plant overheated",
-		Description: msg,
+		Name:        reason,
+		Description: description,
 		Agent:       "CRON",
 	}).Error
 
