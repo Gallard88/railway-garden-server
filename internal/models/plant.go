@@ -19,7 +19,8 @@ type Plant struct {
 	DeficitThreshold      float64   `json:"deficit_threshold"`      // mm of deficit before watering triggered (lower for sandy, higher for clay)
 	LookbackDays          uint      `json:"lookback_days"`          // 1 for pots, 3-5 for in-ground
 	RainfallEffectiveness float64   `json:"rainfall_effectiveness"` // how much rainfall actually reaches the zone (pots under eaves etc), default 1.0
-
+	OverheatedTemp        float64   `json:"overheated_temp"`        // A threshold for determining when a platn has gotten too hot and should be water at the earliest convenience.
+	NeedsWatering         bool      `json:"needs_watering"`
 }
 
 const (
@@ -36,13 +37,14 @@ const (
 )
 
 type PlantZone struct {
-	ID            uint      `gorm:"primaryKey" json:"id"`
-	Name          string    `gorm:"not null" json:"name"`
-	LocationID    uint      `gorm:"check:location_id >= 0" json:"location_id"`
-	Outdoor       bool      `json:"outdoor"`
-	RainThreshold float64   `json:"rain_threshold"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	ID             uint      `gorm:"primaryKey" json:"id"`
+	Name           string    `gorm:"not null" json:"name"`
+	LocationID     uint      `gorm:"check:location_id >= 0" json:"location_id"`
+	Outdoor        bool      `json:"outdoor"`
+	RainThreshold  float64   `json:"rain_threshold"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+	OverheatedTemp float64   `json:"overheated_temp"` // A threshold for determining when a platn has gotten too hot and should be water at the earliest convenience.
 }
 
 type PlantHistory struct {

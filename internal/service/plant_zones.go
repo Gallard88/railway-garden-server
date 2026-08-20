@@ -58,11 +58,12 @@ func (s *plantZoneService) ListZones(ctx context.Context) (*dto.ListPlantZonesRe
 // CreateZone - Create a new zone
 func (s *plantZoneService) CreateZone(ctx context.Context, req dto.CreatePlantZoneRequest) (*dto.PlantZoneResponse, error) {
 	zone := &models.PlantZone{
-		Name:          req.Name,
-		LocationID:    req.LocationID,
-		Outdoor:       req.Outdoor,
-		RainThreshold: req.RainThreshold,
-		CreatedAt:     time.Now(),
+		Name:           req.Name,
+		LocationID:     req.LocationID,
+		Outdoor:        req.Outdoor,
+		RainThreshold:  req.RainThreshold,
+		CreatedAt:      time.Now(),
+		OverheatedTemp: req.OverheatedTemp,
 	}
 
 	// Save to database
@@ -76,12 +77,13 @@ func (s *plantZoneService) CreateZone(ctx context.Context, req dto.CreatePlantZo
 // Helper: Convert model to DTO
 func (s *plantZoneService) modelToResponse(zone *models.PlantZone) *dto.PlantZoneResponse {
 	return &dto.PlantZoneResponse{
-		ID:            zone.ID,
-		Name:          zone.Name,
-		LocationID:    zone.LocationID,
-		Outdoor:       zone.Outdoor,
-		RainThreshold: zone.RainThreshold,
-		CreatedAt:     zone.CreatedAt,
+		ID:             zone.ID,
+		Name:           zone.Name,
+		LocationID:     zone.LocationID,
+		Outdoor:        zone.Outdoor,
+		RainThreshold:  zone.RainThreshold,
+		CreatedAt:      zone.CreatedAt,
+		OverheatedTemp: zone.OverheatedTemp,
 	}
 }
 
@@ -295,5 +297,7 @@ func (s *plantService) modelToResponse(plant *models.Plant, history []models.Pla
 		LookbackDays:          plant.LookbackDays,
 		RainfallEffectiveness: plant.RainfallEffectiveness,
 		Log:                   history,
+		OverheatedTemp:        plant.OverheatedTemp,
+		NeedsWatering:         plant.NeedsWatering,
 	}
 }

@@ -60,12 +60,14 @@ func (r *plantZoneRepository) Create(ctx context.Context, zone *models.PlantZone
 // ================================================
 type PlantRepository interface {
 	FindByID(ctx context.Context, id uint) (*models.Plant, error)
+	FindByZoneID(ctx context.Context, zoneId uint) ([]models.Plant, error)
 	List(ctx context.Context) ([]models.Plant, error)
 	Create(ctx context.Context, plant *models.Plant) error
 	Update(ctx context.Context, updatedPlant models.Plant) error
 	DeletePlant(ctx context.Context, id uint) error
 	Water(ctx context.Context, id uint) (*models.Plant, error)
 	FindByZone(ctx context.Context, zoneID uint) ([]models.Plant, error)
+	MarkOverheated(ctx context.Context, plantId uint, msg string) error
 
 	// History related functions
 	ReadHistory(ctx context.Context, plantId uint) ([]models.PlantHistory, error)
@@ -90,6 +92,14 @@ func (r *plantRepository) FindByID(ctx context.Context, id uint) (*models.Plant,
 		return nil, err
 	}
 	return &plant, nil
+}
+
+func (r *plantRepository) FindByZoneID(ctx context.Context, zoneId uint) ([]models.Plant, error) {
+	var plants []models.Plant
+	err := r.db.WithContext(ctx).
+		Where("zone = ?", zoneId).
+		Find(&plants).Error
+	return plants, err
 }
 
 func (r *plantRepository) List(ctx context.Context) ([]models.Plant, error) {
@@ -119,6 +129,33 @@ func (r *plantRepository) FindByZone(ctx context.Context, zoneID uint) ([]models
 		Where("zone_id = ?", zoneID).
 		Find(&plants).Error
 	return plants, err
+}
+
+func (r *plantRepository) MarkOverheated(ctx context.Context, plantId uint, msg string) error {
+	now := time.Now()
+
+	result := r.db.WithContext(ctx).
+		Model(&models.Plant{}).
+		Where("id = ?", plantId).
+		Updates(map[string]interface{}{
+			"needs_watering": true,
+			"updated_at":     now,
+		})
+
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return errors.New("plant not found")
+	}
+	return r.db.WithContext(ctx).Create(&models.PlantHistory{
+		PlantId:     plantId,
+		CreatedAt:   time.Now(),
+		Name:        "plant overheated",
+		Description: msg,
+		Agent:       "CRON",
+	}).Error
+
 }
 
 func (r *plantRepository) Update(ctx context.Context, updatedPlant models.Plant) error {

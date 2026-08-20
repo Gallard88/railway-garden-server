@@ -58,10 +58,11 @@ func main() {
 		logger: logger,
 		cron:   cronScheduler,
 		db:     db,
-		waterService: service.NewPlantWateringService(
+		waterService: service.NewPlantWateringService( // TODO: Can I clean this up?
 			repository.NewPlantRepository(db),
 			repository.NewWeatherRainfallRepository(db),
 			repository.NewPlantZoneRepository(db),
+			repository.NewWeatherRecordRepository(db),
 		),
 	}
 

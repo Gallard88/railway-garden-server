@@ -4,12 +4,21 @@ import (
 	"context"
 	"log"
 
+	"goapi.railway.app/internal/repository"
 	"goapi.railway.app/internal/service"
 	"gorm.io/gorm"
 )
 
+var plantWaterService service.PlantWateringService
+
 func (app *application) setupCronJobs() {
 	ctx := context.Background()
+
+	plantWaterService = service.NewPlantWateringService(
+		repository.NewPlantRepository(app.db),
+		repository.NewWeatherRainfallRepository(app.db),
+		repository.NewPlantZoneRepository(app.db),
+		repository.NewWeatherRecordRepository(app.db))
 
 	app.cron.AddFunc("7/15 * * * *", func() {
 		//log.Println("Running task: fetchWeatherForAllLocations() ")
@@ -44,4 +53,9 @@ func (app *application) fetchWeatherForAllLocations(db *gorm.DB) {
 
 func (app *application) fetchRainfallForAllLocations(db *gorm.DB) {
 	service.FetchRainfallForAllLocations(db)
+
+	// Run the over temp logic.
+	ctx := context.Background()
+	plantWaterService.CheckForOverheaterPlants(ctx)
+	// Then check if they have received enough rainfall.
 }

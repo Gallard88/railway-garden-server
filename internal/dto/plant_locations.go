@@ -8,20 +8,22 @@ import (
 
 // PlantZoneResponse - What we return to clients
 type PlantZoneResponse struct {
-	ID            uint      `json:"id"`
-	Name          string    `json:"name"`
-	LocationID    uint      `json:"location_id"`
-	Outdoor       bool      `json:"outdoor"`
-	RainThreshold float64   `json:"rain_threshold"`
-	CreatedAt     time.Time `json:"created_at"`
+	ID             uint      `json:"id"`
+	Name           string    `json:"name"`
+	LocationID     uint      `json:"location_id"`
+	Outdoor        bool      `json:"outdoor"`
+	RainThreshold  float64   `json:"rain_threshold"`
+	CreatedAt      time.Time `json:"created_at"`
+	OverheatedTemp float64   `json:"overheated_temp"`
 }
 
 // CreatePlantZoneRequest - For creating new plant zones
 type CreatePlantZoneRequest struct {
-	Name          string  `json:"name" binding:"required,min=2"`
-	LocationID    uint    `json:"location_id"`
-	Outdoor       bool    `json:"outdoor"`
-	RainThreshold float64 `json:"rain_threshold"`
+	Name           string  `json:"name" binding:"required,min=2"`
+	LocationID     uint    `json:"location_id"`
+	Outdoor        bool    `json:"outdoor"`
+	RainThreshold  float64 `json:"rain_threshold"`
+	OverheatedTemp float64 `json:"overheated_temp"`
 }
 
 // ListPlantZonesResponse - List all plant zones
@@ -49,6 +51,8 @@ type PlantResponse struct {
 	LookbackDays          uint                  `json:"lookback_days"`          // 1 for pots, 3-5 for in-ground
 	RainfallEffectiveness float64               `json:"rainfall_effectiveness"` // how much rainfall actually reaches the zone (pots under eaves etc), default 1.0
 	Log                   []models.PlantHistory `json:"log"`
+	OverheatedTemp        float64               `json:"overheated_temp"`
+	NeedsWatering         bool                  `json:"needs_watering"`
 }
 
 // CreatePlantRequest - For creating new plants

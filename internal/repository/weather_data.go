@@ -10,6 +10,7 @@ import (
 
 type WeatherRecordRepository interface {
 	List(ctx context.Context, id uint) ([]models.WeatherRecord, error)
+	ListByTime(ctx context.Context, id uint, t time.Time) ([]models.WeatherRecord, error)
 }
 
 type weatherRecordRepository struct {
@@ -33,6 +34,17 @@ func (r *weatherRecordRepository) List(ctx context.Context, id uint) ([]models.W
 		Where("location_id = ?", id).
 		Order("time DESC").
 		Limit(maxRecords).
+		Find(&WeatherRecords).Error
+	return WeatherRecords, err
+}
+
+func (r *weatherRecordRepository) ListByTime(ctx context.Context, id uint, t time.Time) ([]models.WeatherRecord, error) {
+	var WeatherRecords []models.WeatherRecord
+	err := r.db.WithContext(ctx).
+		Where("location_id = ?", id).
+		Where("time >= ?", t).
+		Order("time DESC").
+		Limit(1000).
 		Find(&WeatherRecords).Error
 	return WeatherRecords, err
 }
