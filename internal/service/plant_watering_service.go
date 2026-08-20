@@ -188,7 +188,7 @@ func (s *plantWateringService) CheckForOverheaterPlants(ctx context.Context) {
 		for _, plant := range plants {
 			maxTemp := s.findMaxTempWithinDate(temp, plant.LastWatered)
 			if maxTemp >= plant.OverheatedTemp {
-				s.plantRepo.MarkOverheated(ctx, plant.ID, fmt.Sprintf("Temp was %2.1f", maxTemp))
+				s.plantRepo.MarkOverheated(ctx, plant.ID, fmt.Sprintf("Temp was %2.1f, threshold %2.1f ", maxTemp, plant.OverheatedTemp))
 			}
 		}
 	}
