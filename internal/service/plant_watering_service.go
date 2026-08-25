@@ -120,8 +120,6 @@ func (s *plantWateringService) CheckWateringStatus(ctx context.Context) {
 				log.Printf("Failed to get temp for zone %d: %s\n", zone.Name, err)
 				return
 			}
-			log.Printf("Rain data: %+v\n", rainData)
-
 			needWatering, msg := s.checkWateringStatus(plant, rainData)
 			if needWatering {
 				s.plantRepo.MarkNeedsWatering(ctx, plant.ID, "Evaporation", msg)
@@ -141,10 +139,15 @@ func (s *plantWateringService) checkWateringStatus(plant models.Plant, list []mo
 		transpiration += list[i].Evapotranspiration
 		precipitation += list[i].Precipitation
 	}
-	transpiration = transpiration * plant.ET0
-	precipitation = precipitation * plant.RainfallEffectiveness
+	adjusted_transpiration := transpiration * plant.ET0
+	adjusted_precipitation := precipitation * plant.RainfallEffectiveness
+	deficet := adjusted_transpiration - adjusted_precipitation
 
-	deficet := transpiration - precipitation
+	log.Printf("%d:%s", plant.ID, plant.Name)
+	log.Printf("Transpiration: %2.1f, %2.1f (adj)", transpiration, adjusted_transpiration)
+	log.Printf("Precipitation: %2.1f, %2.1f (adj)", precipitation, adjusted_precipitation)
+	log.Printf("Deficet: %2.1f, Threshold %2.1f", deficet, plant.DeficitThreshold)
+
 	return deficet > plant.DeficitThreshold, fmt.Sprintf("Total transpiration: %2.1f, precipitation: %2.1f, threshold: %2.1f", transpiration, precipitation, plant.DeficitThreshold)
 }
 
