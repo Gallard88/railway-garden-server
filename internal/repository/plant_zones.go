@@ -183,6 +183,7 @@ func (r *plantRepository) Water(ctx context.Context, id uint) (*models.Plant, er
 	plant.LastWatered = now
 	plant.NextWater = now.AddDate(0, 0, int(plant.WaterFreq))
 	plant.UpdatedAt = now
+	plant.NeedsWatering = false
 
 	err = r.db.WithContext(ctx).Save(&plant).Error
 	if err != nil {
