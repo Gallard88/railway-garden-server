@@ -121,7 +121,7 @@ func (s *plantWateringService) CheckWateringStatus(ctx context.Context) {
 				return
 			}
 			needWatering, msg := s.checkWateringStatus(plant, rainData)
-			if needWatering {
+			if needWatering && !plant.NeedsWatering {
 				s.plantRepo.MarkNeedsWatering(ctx, plant.ID, "Evaporation", msg)
 			}
 		}
@@ -148,7 +148,7 @@ func (s *plantWateringService) checkWateringStatus(plant models.Plant, list []mo
 	log.Printf("Precipitation: %2.1f, %2.1f (adj)", precipitation, adjusted_precipitation)
 	log.Printf("Deficet: %2.1f, Threshold %2.1f", deficet, plant.DeficitThreshold)
 
-	return deficet > plant.DeficitThreshold, fmt.Sprintf("Total transpiration: %2.1f, precipitation: %2.1f, threshold: %2.1f", transpiration, precipitation, plant.DeficitThreshold)
+	return deficet > plant.DeficitThreshold, fmt.Sprintf("Total transpiration: %2.1f, precipitation: %2.1f, threshold: %2.1f", adjusted_transpiration, adjusted_precipitation, plant.DeficitThreshold)
 }
 
 func (s *plantWateringService) findMaxTempWithinDate(list []models.WeatherRecord, date time.Time) float64 {
