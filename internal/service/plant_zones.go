@@ -299,6 +299,17 @@ func (s *plantService) CreateHistoryEvent(ctx context.Context, req dto.WriteHist
 
 // Helper: Convert model to DTO
 func (s *plantService) modelToResponse(plant *models.Plant, history []models.PlantHistory) *dto.PlantResponse {
+
+	log := make([]dto.SimpleHistory, len(history))
+	for i := range history {
+		log[i] = dto.SimpleHistory{
+			ID:          history[i].ID,
+			Date:        history[i].CreatedAt,
+			Name:        history[i].Name,
+			Description: history[i].Description,
+		}
+	}
+
 	return &dto.PlantResponse{
 		ID:                    plant.ID,
 		Name:                  plant.Name,
@@ -316,7 +327,7 @@ func (s *plantService) modelToResponse(plant *models.Plant, history []models.Pla
 		DeficitThreshold:      plant.DeficitThreshold,
 		LookbackDays:          plant.LookbackDays,
 		RainfallEffectiveness: plant.RainfallEffectiveness,
-		Log:                   history,
+		Log:                   log,
 		OverheatedTemp:        plant.OverheatedTemp,
 		NeedsWatering:         plant.NeedsWatering,
 	}
