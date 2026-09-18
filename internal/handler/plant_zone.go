@@ -75,13 +75,32 @@ func (h *PlantZoneHandler) CreateZone(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"zone": zone})
 }
 
+func (h *PlantZoneHandler) WaterZone(c *gin.Context) {
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid zone ID"})
+		return
+	}
+
+	// 2. Call service
+	err = h.zoneService.WaterZone(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+
+	// 3. Return response
+	c.JSON(http.StatusOK, gin.H{})
+}
+
 // RegisterRoutes - Register all plant zone routes
 func (h *PlantZoneHandler) RegisterRoutes(router *gin.RouterGroup) {
 	zones := router.Group("/plant-zones")
 	{
-		zones.GET("", h.ListZones)   // GET /v1/plant-zones
-		zones.GET("/:id", h.GetZone) // GET /v1/plant-zones/:id
-		zones.POST("", h.CreateZone) // POST /v1/plant-zones
+		zones.GET("", h.ListZones)           // GET /v1/plant-zones
+		zones.GET("/:id", h.GetZone)         // GET /v1/plant-zones/:id
+		zones.POST("", h.CreateZone)         // POST /v1/plant-zones
+		zones.PUT("/:id/water", h.WaterZone) // GET /v1/plant-zones/:id
 	}
 }
 

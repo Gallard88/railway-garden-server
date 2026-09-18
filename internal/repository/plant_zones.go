@@ -126,7 +126,7 @@ func (r *plantRepository) DeletePlant(ctx context.Context, id uint) error {
 func (r *plantRepository) FindByZone(ctx context.Context, zoneID uint) ([]models.Plant, error) {
 	var plants []models.Plant
 	err := r.db.WithContext(ctx).
-		Where("zone_id = ?", zoneID).
+		Where("zone = ?", zoneID).
 		Find(&plants).Error
 	return plants, err
 }

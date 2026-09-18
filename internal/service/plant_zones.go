@@ -14,15 +14,18 @@ type PlantZoneService interface {
 	GetZone(ctx context.Context, id uint) (*dto.PlantZoneResponse, error)
 	ListZones(ctx context.Context) (*dto.ListPlantZonesResponse, error)
 	CreateZone(ctx context.Context, req dto.CreatePlantZoneRequest) (*dto.PlantZoneResponse, error)
+	WaterZone(ctx context.Context, id uint) error
 }
 
 type plantZoneService struct {
-	zoneRepo repository.PlantZoneRepository
+	zoneRepo  repository.PlantZoneRepository
+	plantRepo repository.PlantRepository
 }
 
-func NewPlantZoneService(zoneRepo repository.PlantZoneRepository) PlantZoneService {
+func NewPlantZoneService(zoneRepo repository.PlantZoneRepository, plantRepo repository.PlantRepository) PlantZoneService {
 	return &plantZoneService{
-		zoneRepo: zoneRepo,
+		zoneRepo:  zoneRepo,
+		plantRepo: plantRepo,
 	}
 }
 
@@ -72,6 +75,25 @@ func (s *plantZoneService) CreateZone(ctx context.Context, req dto.CreatePlantZo
 	}
 
 	return s.modelToResponse(zone), nil
+}
+
+func (s *plantZoneService) WaterZone(ctx context.Context, id uint) error {
+	// Get all plants in zone.
+	list, err := s.plantRepo.FindByZone(ctx, id)
+	if err != nil {
+		return fmt.Errorf("failed to load plants in  zone(%d): %w", id, err)
+	}
+	fmt.Printf("PlantList: %+v\n", list)
+	for _, plant := range list {
+		fmt.Printf("Plant: %+v\n", plant)
+		s.plantRepo.Water(ctx, plant.ID)
+		s.plantRepo.CreateHistoryEvent(ctx, &models.PlantHistory{
+			PlantId:     plant.ID,
+			Name:        "Watered Plant",
+			Description: "Watered zone",
+		})
+	}
+	return nil
 }
 
 // Helper: Convert model to DTO
