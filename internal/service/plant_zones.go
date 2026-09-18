@@ -83,9 +83,7 @@ func (s *plantZoneService) WaterZone(ctx context.Context, id uint) error {
 	if err != nil {
 		return fmt.Errorf("failed to load plants in  zone(%d): %w", id, err)
 	}
-	fmt.Printf("PlantList: %+v\n", list)
 	for _, plant := range list {
-		fmt.Printf("Plant: %+v\n", plant)
 		s.plantRepo.Water(ctx, plant.ID)
 		s.plantRepo.CreateHistoryEvent(ctx, &models.PlantHistory{
 			PlantId:     plant.ID,
