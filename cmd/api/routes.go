@@ -30,7 +30,10 @@ func (app *application) routes() *gin.Engine {
 
 	// Initialize repositories
 	locationRepo := repository.NewWeatherLocationRepository(app.db)
-	locationService := service.NewWeatherLocationService(locationRepo)
+	weatherRecordRepo := repository.NewWeatherRecordRepository(app.db)
+	weatherRainfallRepo := repository.NewWeatherRainfallRepository(app.db)
+
+	locationService := service.NewWeatherLocationService(locationRepo, weatherRecordRepo, weatherRainfallRepo)
 	locationHandler := handler.NewWeatherLocationHandler(locationService)
 
 	// Health check route
@@ -50,16 +53,6 @@ func (app *application) routes() *gin.Engine {
 	zoneService := service.NewPlantZoneService(zoneRepo, plantsRepo)
 	zoneHandler := handler.NewPlantZoneHandler(zoneService)
 	zoneHandler.RegisterRoutes(v1)
-
-	weatherRecordRepo := repository.NewWeatherRecordRepository(app.db)
-	weatherRecordService := service.NewWeatherRecordService(weatherRecordRepo)
-	weatherRecordHandler := handler.NewWeatherRecordHandler(weatherRecordService)
-	weatherRecordHandler.RegisterRoutes(v1)
-
-	weatherRainfallRepo := repository.NewWeatherRainfallRepository(app.db)
-	weatherRainfallService := service.NewWeatherRainfallService(weatherRainfallRepo)
-	weatherRainfallHandler := handler.NewWeatherRainfallHandler(weatherRainfallService)
-	weatherRainfallHandler.RegisterRoutes(v1)
 
 	return router
 }

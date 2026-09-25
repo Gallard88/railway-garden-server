@@ -72,12 +72,46 @@ func (h *WeatherLocationHandler) CreateLocation(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"location": location})
 }
 
+// GetLocation - GET /v1/weather-locations/:id/rainfall
+func (h *WeatherLocationHandler) getRainfall(c *gin.Context) {
+	// 1. Parse ID from URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid location ID"})
+		return
+	}
+	results, err := h.locationService.GetRainfall(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": id, "rainfall": results})
+}
+
+// getTemperature - GET /v1/weather-locations/:id/temperature
+func (h *WeatherLocationHandler) getTemperature(c *gin.Context) {
+	// 1. Parse ID from URL
+	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid location ID"})
+		return
+	}
+	results, err := h.locationService.GetTemperature(c.Request.Context(), uint(id))
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"id": id, "temperature": results})
+}
+
 // RegisterRoutes - Register all weather location routes
 func (h *WeatherLocationHandler) RegisterRoutes(router *gin.RouterGroup) {
 	locations := router.Group("/weather-locations")
 	{
-		locations.GET("", h.ListLocations)   // GET /v1/weather-locations
-		locations.GET("/:id", h.GetLocation) // GET /v1/weather-locations/:id
-		locations.POST("", h.CreateLocation) // POST /v1/weather-locations
+		locations.GET("", h.ListLocations)                  // GET /v1/weather-locations
+		locations.GET("/:id", h.GetLocation)                // GET /v1/weather-locations/:id
+		locations.POST("", h.CreateLocation)                // POST /v1/weather-locations
+		locations.GET("/:id/rainfall", h.getRainfall)       // GET
+		locations.GET("/:id/temperature", h.getTemperature) // GET
 	}
 }
